@@ -1,5 +1,10 @@
 ﻿@model IEnumerable<WebApplication2.Models.客戶銀行資訊>
 
+
+@section breadcrumb{
+<li><a href="@Url.Action("Index", "客戶銀行資訊")">客戶銀行資訊</a></li>
+}
+
 @{
     ViewBag.Title = "Index";
 }
@@ -12,10 +17,14 @@
     @using (Html.BeginForm())
     {
     <p>
-        銀行名稱: @Html.TextBox("SearchString") <input type="submit" value="搜尋" /> <br />
-
+        銀行名稱: @Html.TextBox("SearchString") <button>搜尋</button> <br />
     </p>
     }
+
+<button class="btn btn-primary" id="ButtonExport" name="ButtonExport" onclick="location.href='@Url.Action("ExportData", "客戶銀行資訊")'">
+    匯出資料
+</button>
+
 </p>
 <table class="table">
     <tr>

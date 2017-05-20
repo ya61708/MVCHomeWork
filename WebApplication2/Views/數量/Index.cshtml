@@ -1,5 +1,10 @@
 ﻿@model IEnumerable<WebApplication2.Models.數量View>
 
+@section breadcrumb{
+    <li><a href="@Url.Action("Index", "數量")">數量</a></li>
+}
+
+
 @{
     ViewBag.Title = "Index";
 }

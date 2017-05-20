@@ -1,40 +1,38 @@
-﻿using System;
+﻿using ClosedXML.Excel;
+using PagedList;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
+using System.Data.Entity.Validation;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using WebApplication2.ActionFilter;
 using WebApplication2.Models;
 
 namespace WebApplication2.Controllers
 {
     public class 客戶資料Controller : Controller
     {
-        private 客戶資料Entities db = new 客戶資料Entities();
-
-        // GET: 客戶資料
-        public ActionResult Index(String searchString)
+        客戶資料Repository repo = RepositoryHelper.Get客戶資料Repository();
+    
+        public ActionResult Index(String searchString,String 客戶分類)
         {
-            var all= db.客戶資料.AsQueryable();
-           
-            if (!String.IsNullOrEmpty(searchString)){
-                var data = all.Where(p => p.Is刪除 == false && p.客戶名稱.Contains(searchString));
-                return View(data);
-            }
-            else {
-                var data = all.Where(p => p.Is刪除 == false);
-                return View(data);
-            }
+
+           ViewBag.客戶分類 = repo.Get客戶分類選單();
+
+           return View(repo.Get全部客戶資料包含搜尋(searchString,客戶分類));
         }
+
 
         public ActionResult Details(int id)
         {
-
-            var 客戶資料 = db.Database.SqlQuery<客戶資料>("SELECT * FROM dbo.客戶資料 WHERE Id=@p0", id).FirstOrDefault();
-
-            return View(客戶資料);
+            return View(repo.Get單筆客戶資料ById(id));
         }
 
  
@@ -45,23 +43,32 @@ namespace WebApplication2.Controllers
 
        
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        [HandleError(ExceptionType = typeof(DbEntityValidationException), View = "Error_DbEntityValidationException")]
         public ActionResult Create(客戶資料 客戶資料)
         {
-            if (ModelState.IsValid)
+            //if (ModelState.IsValid)
             {
-                db.客戶資料.Add(客戶資料);
-                db.SaveChanges();
+                repo.新增客戶資料(客戶資料);
+                repo.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
 
             return View(客戶資料);
         }
 
-   
-        public ActionResult Edit(int id)
+        
+        public ActionResult Edit(int? id)
         {
-         
-            var 客戶資料 = db.客戶資料.Find(id);
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            客戶資料 客戶資料 = repo.Get單筆客戶資料ById(id.Value);
+            if (客戶資料 == null)
+            {
+                return HttpNotFound();
+            }
             return View(客戶資料);
         }
 
@@ -69,33 +76,33 @@ namespace WebApplication2.Controllers
         [HttpPost]
         public ActionResult Edit(int id, 客戶資料 客戶資料)
         {
-            if (ModelState.IsValid)
+             var data = repo.Get單筆客戶資料ById(id);
+
+            if (TryUpdateModel<客戶資料>(data))
             {
-                var item = db.客戶資料.Find(id);
-                item.客戶名稱 = 客戶資料.客戶名稱;
-                item.傳真 = 客戶資料.傳真;
-                item.地址 = 客戶資料.地址;
-                item.客戶聯絡人 = 客戶資料.客戶聯絡人;
-                item.客戶銀行資訊 = 客戶資料.客戶銀行資訊;
-                item.統一編號 = 客戶資料.統一編號;
-                item.電話 = 客戶資料.電話;
-                item.Email = 客戶資料.Email;
-                db.SaveChanges();
-
-
+                repo.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
             return View(客戶資料);
         }
 
-        public ActionResult Delete(int id)
+        public ActionResult Delete(int? id)
         {
-            var 客戶資料 = db.客戶資料.Find(id);
+            var 客戶資料 = repo.Get單筆客戶資料ById(id.Value);
 
-            客戶資料.Is刪除 = true;
-            db.SaveChanges();
+            repo.UnitOfWork.Context.Configuration.ValidateOnSaveEnabled = false;
+            repo.Delete(客戶資料);
+            repo.UnitOfWork.Commit();
 
             return RedirectToAction("Index");
         }
+
+        public ActionResult ExportData()
+        {
+            return File(repo.Get匯出Excel檔(), "application/vnd.ms-excel", "客戶資料.xls");
+        }
+
+      
+
     }
 }

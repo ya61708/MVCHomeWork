@@ -10,7 +10,16 @@ namespace WebApplication2.Models
 
     public partial class 客戶資料
     {
-        
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (this.統一編號.Length<3)
+            {
+                yield return new ValidationResult("統一編號長度錯誤",new String[] {"統一編號"});
+            }
+
+            yield break;
+        }
+
     }
     
     public partial class 客戶資料MetaData
@@ -39,7 +48,10 @@ namespace WebApplication2.Models
         [StringLength(250, ErrorMessage="欄位長度不得大於 250 個字元")]
         [Email驗證()]
         public string Email { get; set; }
-    
+        
+        [Required]
+        public String 客戶分類 { get; set; }
+
         public virtual ICollection<客戶銀行資訊> 客戶銀行資訊 { get; set; }
         public virtual ICollection<客戶聯絡人> 客戶聯絡人 { get; set; }
         public bool setMail()

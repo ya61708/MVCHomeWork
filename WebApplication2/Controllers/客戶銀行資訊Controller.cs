@@ -12,34 +12,23 @@ namespace WebApplication2.Controllers
 {
     public class 客戶銀行資訊Controller : Controller
     {
-        private 客戶資料Entities db = new 客戶資料Entities();
+        客戶銀行資訊Repository repo = RepositoryHelper.Get客戶銀行資訊Repository();
+        客戶資料Repository repo1 = RepositoryHelper.Get客戶資料Repository();
+
 
         public ActionResult Index(String searchString)
         {
-            var all = db.客戶銀行資訊.AsQueryable();
-
-
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                var 客戶銀行資訊 = all.Include(客 => 客.客戶資料).Where(p => p.Is刪除 == false && p.銀行名稱.Contains(searchString));
-                return View(客戶銀行資訊);
-            }
-            else
-            {
-                var 客戶銀行資訊 = all.Include(客 => 客.客戶資料).Where(p => p.Is刪除 == false);
-                return View(客戶銀行資訊);
-            }
+            return View(repo.Get全部客戶銀行資料包含搜尋(searchString));
         }
 
-        public ActionResult Details(int id)
+        public ActionResult Details(int? id)
         {
-            客戶銀行資訊 客戶銀行資訊 = db.客戶銀行資訊.Find(id);
-            return View(客戶銀行資訊);
+            return View(repo.Get單筆客戶銀行資料ById(id.Value));
         }
 
         public ActionResult Create()
         {
-            ViewBag.客戶Id = new SelectList(db.客戶資料, "Id", "客戶名稱");
+            ViewBag.客戶Id = new SelectList(repo1.Get全部客戶資料包含搜尋("",""), "Id", "客戶名稱");
 
             return View();
         }
@@ -49,22 +38,22 @@ namespace WebApplication2.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.客戶銀行資訊.Add(客戶銀行資訊);
-                db.SaveChanges();
+                repo.新增客戶銀行資訊資料(客戶銀行資訊);
+                repo.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
 
-            ViewBag.客戶Id = new SelectList(db.客戶資料, "Id", "客戶名稱");
+            ViewBag.客戶Id = new SelectList(repo1.Get全部客戶資料包含搜尋("",""), "Id", "客戶名稱");
 
             return View(客戶銀行資訊);
         }
         
-        public ActionResult Edit(int id)
+        public ActionResult Edit(int? id)
         {
-            
-            var item = db.客戶銀行資訊.Find(id);
 
-            ViewBag.客戶Id = new SelectList(db.客戶資料, "Id", "客戶名稱");
+            var item = repo.Get單筆客戶銀行資料ById(id.Value);
+
+            ViewBag.客戶Id = new SelectList(repo1.Get全部客戶資料包含搜尋("",""), "Id", "客戶名稱");
 
 
             return View(item);
@@ -76,32 +65,31 @@ namespace WebApplication2.Controllers
         {
             if (ModelState.IsValid)
             {
-                var item = db.客戶銀行資訊.Find(id);
-                item.分行代碼 = 客戶銀行資訊.分行代碼;
-                item.客戶Id = 客戶銀行資訊.客戶Id;
-                item.客戶資料 = 客戶銀行資訊.客戶資料;
-                item.帳戶名稱 = 客戶銀行資訊.帳戶名稱;
-                item.帳戶號碼 = 客戶銀行資訊.帳戶號碼;
-                item.銀行代碼 = 客戶銀行資訊.銀行代碼;
-                item.銀行名稱 = 客戶銀行資訊.銀行名稱;
+                var item = repo.Get單筆客戶銀行資料ById(id);
 
-
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (TryUpdateModel<客戶銀行資訊>(item))
+                {
+                    repo.UnitOfWork.Commit();
+                    return RedirectToAction("Index");
+                }
             }
-            ViewBag.客戶Id = new SelectList(db.客戶資料, "Id", "客戶名稱");
+            ViewBag.客戶Id = new SelectList(repo1.Get全部客戶資料包含搜尋("",""), "Id", "客戶名稱");
 
             return View(客戶銀行資訊);
         }
 
         public ActionResult Delete(int id)
         {
-            var 客戶銀行資訊 = db.客戶銀行資訊.Find(id);
-
-            客戶銀行資訊.Is刪除 = true;
-            db.SaveChanges();
+            var 客戶銀行資訊 = repo.Get單筆客戶銀行資料ById(id);
+            repo.Delete(客戶銀行資訊);
+            repo.UnitOfWork.Commit();
 
             return RedirectToAction("Index");
+        }
+
+        public ActionResult ExportData()
+        {
+            return File(repo.Get匯出Excel檔(), "application/vnd.ms-excel", "客戶銀行資訊.xls");
         }
 
     }

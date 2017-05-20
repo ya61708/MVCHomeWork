@@ -1,5 +1,9 @@
 ﻿@model IEnumerable<WebApplication2.Models.客戶資料>
 
+@section breadcrumb{
+    <li><a href="@Url.Action("Index", "客戶資料")">客戶資料</a></li>
+}
+
 @{
     ViewBag.Title = "Index";
 }
@@ -9,18 +13,24 @@
 <p>
     @Html.ActionLink("Create New", "Create")
 
-
-    @using (Html.BeginForm())
-    {
-    <p>
-        客戶名稱: @Html.TextBox("SearchString") <input type="submit" value="搜尋" /> <br />
-    
-    </p>
-    }
-
-    
-
 </p>
+@using (Html.BeginForm())
+{
+    <p>
+        客戶名稱: @Html.TextBox("SearchString")<br />
+
+        客戶分類: @Html.DropDownList("客戶分類", null, htmlAttributes: new { @class = "form-control" }) <button>搜尋</button> <br />  
+    </p>
+}
+
+<button class="btn btn-primary" id="ButtonExport" name="ButtonExport" onclick="location.href='@Url.Action("ExportData", "客戶資料")'">
+    匯出資料
+</button>
+
+
+
+
+
 <table class="table">
     <tr>
         <th>

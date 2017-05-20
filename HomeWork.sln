@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeWorkFirstWeek", "WebApplication2\HomeWorkFirstWeek.csproj", "{817B3C2E-46EF-4E00-9D9A-7FFA67D4CC39}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeWork", "WebApplication2\HomeWork.csproj", "{817B3C2E-46EF-4E00-9D9A-7FFA67D4CC39}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
